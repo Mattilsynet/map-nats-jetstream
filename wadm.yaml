@@ -1,0 +1,59 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: map-nats-jetstream
+  annotations:
+    version: v0.0.1
+    description: 'An application with a provider and component built for extending wasmCloud with custom capabilities'
+    wasmcloud.dev/authors: wasmCloud team
+    wasmcloud.dev/source-url: https://github.com/wasmCloud/wasmCloud/blob/main/examples/golang/providers/custom-template/wadm.yaml
+    wasmcloud.dev/readme-md-url: https://github.com/wasmCloud/wasmCloud/blob/main/examples/golang/providers/custom-template/README.md
+    wasmcloud.dev/homepage: https://github.com/wasmCloud/wasmCloud/tree/main/examples/golang/providers/custom-template
+    wasmcloud.dev/categories: |
+      capability-provider,provider,template,http-server,tinygo,golang,example
+spec:
+  components:
+    - name: test-component
+      type: component
+      properties:
+        image: file://./component/build/map-jetstream-nats-component_s.wasm
+      traits:
+        - type: spreadscaler
+          properties:
+            instances: 1
+        - type: link
+          properties:
+            target: map-jetstream-nats
+            namespace: mattilsynet
+            package: provider-jetstream-nats
+            interfaces: [jetstream-publish]
+            target_config:
+              - name: nats-config
+                properties:
+                  jwt: ""
+                  seed: ""
+                  url: "nats://localhost:4222"
+
+    - name: map-jetstream-nats
+      type: capability
+      properties:
+        image: file://./build/map-jetstream-nats.par.gz
+      traits:
+        - type: link
+          properties:
+            target: test-component
+            namespace: mattilsynet
+            package: provider-jetstream-nats
+            interfaces: [jetstream-consumer]
+            target_config:
+              - name: nats-jetstream
+                properties:
+                  stream-name: "test-stream"
+                  stream-retention-policy: "interest" # oneof "interest, workqueue, limits"
+                  subject: "test.>"
+                  durable-consumer-name: "test-consumer"
+              - name: nats-config
+                properties:
+                  jwt: ""
+                  seed: ""
+                  url: "nats://localhost:4223"

@@ -1,0 +1,9 @@
+name = "map-jetstream-nats-component"
+language = "tinygo"
+type = "component"
+version = "0.1.0"
+
+[component]
+wit_world = "component"
+wasm_target = "wasm32-wasi-preview2"
+destination = "build/map-jetstream-nats-component_s.wasm"

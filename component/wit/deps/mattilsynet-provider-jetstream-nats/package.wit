@@ -1,0 +1,35 @@
+package mattilsynet:provider-jetstream-nats;
+
+interface types {
+  record key-value {
+    key: string,
+    value: list<string>,
+  }
+
+  record msg {
+    headers: list<key-value>,
+    data: list<u8>,
+    reply: string,
+    subject: string,
+  }
+}
+
+interface jetstream-consumer {
+  use types.{msg};
+
+  handle-message: func(msg: msg) -> result<_, string>;
+}
+
+interface jetstream-publish {
+  use types.{msg};
+
+  publish: func(msg: msg) -> result<_, string>;
+}
+
+/// The `world` defines all of the imports and exports our provider can use / must implement.
+world provider {
+  import types;
+  import jetstream-consumer;
+
+  export jetstream-publish;
+}

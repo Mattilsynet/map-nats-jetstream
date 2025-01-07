@@ -1,0 +1,9 @@
+# NOTE: Not yet supported
+name = "Nats Jetstream Nats"
+language = "go"
+type = "provider"
+version = "0.1.0"
+
+[provider]
+vendor = "wasmCloud"
+bin_name = "map-jetstream-nats"
