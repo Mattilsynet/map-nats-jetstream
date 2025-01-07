@@ -46,11 +46,3 @@ wash up -d
 # Deploy the application
 wash app deploy ./wadm.yaml
 ```
-
-## Customizing
-
-Customizing this provider to meet your needs of a custom capability takes just a few steps.
-
-1. Update the [wit/world.wit](./wit/world.wit) to include the data types and functions that model your custom capability. You can use the example as a base and the [component model WIT reference](https://component-model.bytecodealliance.org/design/wit.html) as a guide for types and keywords.
-1. Implement any provider `export`s in [provider.go](./provider.go) as methods of your `Handler`.
-1. Use any provider `import`s in [provider.go](./provider.go) to invoke linked components. Check out the `Call()` function for an example for how to invoke a component using RPC.
