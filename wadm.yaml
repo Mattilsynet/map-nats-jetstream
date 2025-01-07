@@ -4,13 +4,7 @@ metadata:
   name: map-nats-jetstream
   annotations:
     version: v0.0.1
-    description: 'An application with a provider and component built for extending wasmCloud with custom capabilities'
-    wasmcloud.dev/authors: wasmCloud team
-    wasmcloud.dev/source-url: https://github.com/wasmCloud/wasmCloud/blob/main/examples/golang/providers/custom-template/wadm.yaml
-    wasmcloud.dev/readme-md-url: https://github.com/wasmCloud/wasmCloud/blob/main/examples/golang/providers/custom-template/README.md
-    wasmcloud.dev/homepage: https://github.com/wasmCloud/wasmCloud/tree/main/examples/golang/providers/custom-template
-    wasmcloud.dev/categories: |
-      capability-provider,provider,template,http-server,tinygo,golang,example
+    description: 'An application with a provider and component built to supply components with nats-jetstream publish and consumer capabilities'
 spec:
   components:
     - name: test-component

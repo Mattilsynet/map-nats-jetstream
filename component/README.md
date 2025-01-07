@@ -1,6 +1,6 @@
-# Custom template test component
+# map-jetstream-nats test component
 
-This component is meant to test the [custom template capability provider](../) by an implementation of the interface on the component.
+This component is meant to test the [map-jetstream-nats](../) by an implementation of the interface on the component.
 
 ## Build
 
