@@ -1,6 +1,7 @@
 /bindings/
 map-jetstream-nats
 /build/
-envrc
+.envrc
 go.sum
 wkg.lock
+
