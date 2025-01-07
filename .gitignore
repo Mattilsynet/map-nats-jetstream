@@ -1,6 +1,6 @@
-./bindings/
-./map-jetstream-nats
-./build/
-.envrc
-./go.sum
-./wkg.lock
+/bindings/
+map-jetstream-nats
+/build/
+envrc
+go.sum
+wkg.lock
