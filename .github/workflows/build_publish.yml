@@ -74,6 +74,7 @@ jobs:
        with:
          upload_url: ${{ steps.create_release.outputs.upload_url }}
          asset_path: ./${{ env.providername }}.tar.gz # Path to your file
+         asset_name: ${{ env.providername }}
          asset_content_type: application/gzip
 
 
