@@ -21,7 +21,14 @@ jobs:
      - name: install wash tools
        uses: taiki-e/install-action@v2
        with:
-         tool: wit-bindgen-cli, wasm-tools, wit-deps-cli, wprc 
+         tool: wit-bindgen-cli, wasm-tools, wit-deps-cli 
+     - name: install wit-bindgen-wrpc
+       shell: bash
+       run: |
+         curl -LO https://github.com/bytecodealliance/wrpc/releases/download/v0.11.1/wit-bindgen-wrpc-x86_64-unknown-linux-musl;
+         mv wit-bindgen-wrpc-x86_64-unknown-linux-musl wit-bindgen-wrpc
+         chmod +x wit-bindgen-wrpc
+         install -m 755 wit-bindgen-wrpc /usr/local/bin/
      - name: generate go files
        shell: bash
        run: |
