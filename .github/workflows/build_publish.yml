@@ -9,7 +9,7 @@ jobs:
   wash-build:
     runs-on: ubuntu-latest
     env:
-      built_file_name: map-nats-jetstream.par.gz
+      providername: map-nats-jetstream
     permissions:
      contents: 'write'
      packages: 'write'
@@ -52,8 +52,27 @@ jobs:
          WASH_REG_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
        shell: bash
        run: |
-          wash push ghcr.io/${{ github.repository }}:${{ github.ref_name }} ${{ env.built_file_name }} --annotation org.opencontainers.image.source=${{github.server_url}}/${{ github.repository }}
+          wash push ghcr.io/${{ github.repository }}:${{ github.ref_name }} ${{ env.providername }}.par.gz --annotation org.opencontainers.image.source=${{github.server_url}}/${{ github.repository }}
        working-directory: build
+     - name: Create tar.gz
+       run: |
+         tar -czf map-jetstream-nats.tar.gz ./build/${{ env.providername }}.par.gz 
+     - name: Create GitHub Release
+       id: create_release
+       uses: actions/create-release@v1
+       with:
+         tag_name: ${{ github.ref_name }} # Tag that triggered the workflow
+         release_name: ${{ github.ref_name }}
+         draft: false
+         prerelease: false
+
+     - name: Upload Release Asset
+       uses: actions/upload-release-asset@v1
+       with:
+         upload_url: ${{ steps.create_release.outputs.upload_url }}
+         asset_path: .build/${{ env.providername }}.tar.gz # Path to your file
+         asset_name: ${{ env.providername }}.tar.gz
+         asset_content_type: application/gzip      
 
 
 #TODO: run wash up, wash apply and check output for success messages
