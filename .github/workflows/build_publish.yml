@@ -1,9 +1,8 @@
 name: build_push
-
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*'
       
 jobs:
   wash-build:
@@ -75,8 +74,6 @@ jobs:
        with:
          upload_url: ${{ steps.create_release.outputs.upload_url }}
          asset_path: ./${{ env.providername }}.tar.gz # Path to your file
-         asset_name: ${{ env.providername }}.tar.gz
-         asset_content_type: application/gzip      
 
 
 #TODO: run wash up, wash apply and check output for success messages
