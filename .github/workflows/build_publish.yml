@@ -18,14 +18,18 @@ jobs:
        uses: actions/checkout@v4
      - name: install go
        uses: actions/setup-go@v5
-     - name: install wash-cli cached
-       uses: taiki-e/cache-cargo-install-action@v2
+     - name: install wash tools
+       uses: taiki-e/install-action@v2
        with:
-         tool: wash-cli
+         tool: wit-bindgen-cli, wasm-tools, wit-deps-cli
      - name: generate go files
        shell: bash
        run: |
           go generate ./...
+     - name: install wash-cli cached
+       uses: taiki-e/cache-cargo-install-action@v2
+       with:
+         tool: wash-cli
      - name: validate-yaml
        shell: bash
        run: |
