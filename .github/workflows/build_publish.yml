@@ -56,7 +56,7 @@ jobs:
        working-directory: build
      - name: Create tar.gz
        run: |
-         tar -czf map-jetstream-nats.tar.gz ./build/${{ env.providername }}.par.gz 
+         tar -czf ${{ env.providername }}.tar.gz ./build/${{ env.providername }}.par.gz 
      - name: Create GitHub Release
        id: create_release
        uses: actions/create-release@v1
@@ -74,7 +74,7 @@ jobs:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        with:
          upload_url: ${{ steps.create_release.outputs.upload_url }}
-         asset_path: .build/${{ env.providername }}.tar.gz # Path to your file
+         asset_path: ./${{ env.providername }}.tar.gz # Path to your file
          asset_name: ${{ env.providername }}.tar.gz
          asset_content_type: application/gzip      
 
