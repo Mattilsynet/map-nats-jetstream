@@ -21,7 +21,7 @@ jobs:
      - name: install wash tools
        uses: taiki-e/install-action@v2
        with:
-         tool: wit-bindgen-cli, wasm-tools, wit-deps-cli
+         tool: wit-bindgen-cli, wasm-tools, wit-deps-cli, wprc 
      - name: generate go files
        shell: bash
        run: |
