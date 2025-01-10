@@ -6,4 +6,4 @@ version = "0.1.0"
 
 [provider]
 vendor = "wasmCloud"
-bin_name = "map-jetstream-nats"
+bin_name = "map-nats-jetstream"
