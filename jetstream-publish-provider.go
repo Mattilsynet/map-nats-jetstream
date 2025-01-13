@@ -52,10 +52,10 @@ func NewPublishHandler(linkedFrom, linkedTo map[string]map[string]string) Publis
 }
 
 func (p *PublishHandler) RegisterPublisherComponent(ctx context.Context, sourceId string) error {
+	// read from secrets
 	jwt := p.linkedFrom[sourceId]["jwt"]
 	seed := p.linkedFrom[sourceId]["seed"]
 	url := p.linkedFrom[sourceId]["url"]
-	p.provider.Logger.Info("**** Registering publisher component ****", "sourceid", sourceId)
 	nc, natsConnErr := nats.Connect(url, nats.UserJWTAndSeed(jwt, seed))
 	p.natsConnections[sourceId] = nc
 	if natsConnErr != nil {

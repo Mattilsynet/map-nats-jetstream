@@ -49,6 +49,7 @@ func (p *ConsumeHandler) RegisterConsumerComponent(target string) error {
 		return errors.New("invalid retention policy")
 
 	}
+	// read from secrets
 	durableConsumerName := p.linkedFrom[target]["durable-consumer-name"]
 	subject := p.linkedFrom[target]["subject"]
 	jwt := p.linkedFrom[target]["jwt"]
