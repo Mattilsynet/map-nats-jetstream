@@ -33,16 +33,16 @@ func run() error {
 
 	p, err := provider.New(
 		provider.SourceLinkPut(func(link provider.InterfaceLinkDefinition) error {
-			return handleNewSourceLink(&consumeHandler, link)
+			return handleNewConsumerComponent(&consumeHandler, link)
 		}),
 		provider.TargetLinkPut(func(link provider.InterfaceLinkDefinition) error {
 			return handleNewTargetLink(&publishHandler, link)
 		}),
 		provider.SourceLinkDel(func(link provider.InterfaceLinkDefinition) error {
-			return handleDelSourceLink(&publishHandler, &consumeHandler, link)
+			return handleDelConsumerComponent(&consumeHandler, link)
 		}),
 		provider.TargetLinkDel(func(link provider.InterfaceLinkDefinition) error {
-			return handleDelTargetLink(&publishHandler, &consumeHandler, link)
+			return handleDelPublishConsumer(&publishHandler, link)
 		}),
 		provider.HealthCheck(func() string {
 			return handleHealthCheck(&publishHandler, &consumeHandler)
@@ -94,7 +94,7 @@ func run() error {
 	return nil
 }
 
-func handleNewSourceLink(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
+func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
 	consumeHandler.provider.Logger.Info("Handling new source link", "link", link)
 	consumeHandler.linkedFrom[link.Target] = link.TargetConfig
 	err := consumeHandler.RegisterConsumerComponent(link.Target)
@@ -112,14 +112,14 @@ func handleNewTargetLink(publishHandler *PublishHandler, link provider.Interface
 	return nil
 }
 
-func handleDelSourceLink(publishHandler *PublishHandler, consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
+func handleDelConsumerComponent(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
 	consumeHandler.provider.Logger.Info("Handling del source link", "link", link)
 	delete(consumeHandler.linkedTo, link.SourceID)
 	consumeHandler.DelSourceLink(link.SourceID)
 	return nil
 }
 
-func handleDelTargetLink(publishHandler *PublishHandler, consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
+func handleDelPublishConsumer(publishHandler *PublishHandler, link provider.InterfaceLinkDefinition) error {
 	publishHandler.provider.Logger.Info("Handling del target link", "link", link)
 	delete(publishHandler.linkedFrom, link.Target)
 	return nil
