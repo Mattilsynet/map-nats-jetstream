@@ -45,6 +45,7 @@ jobs:
        shell: bash
        run: |
          wash build
+    ## make something that prints the repository owner and other debug info from underneath wash push variables
      - name: publish package to github repository 
        env:
          WASH_REG_USER: ${{ github.repository_owner }}

@@ -6,11 +6,6 @@ metadata:
     version: v0.0.1
     description: "An application with a provider and component built to supply components with nats-jetstream publish and consumer capabilities"
 spec:
-  policies:
-    - name: nats-kv
-      type: policy.secret.wasmcloud.dev/v1alpha1
-      properties:
-        backend: nats-kv
   components:
     - name: test-component
       type: component
@@ -31,12 +26,17 @@ spec:
                 properties:
                   jwt: ""
                   seed: ""
-                  url: "nats://connect.nats.mattilsynet.io"
+                  url: "nats://localhost:4222"
+            secrets:
+              - name: nats-credentials
+                properties:
+                  policy: nats-kv
+                  key: test-component-nats-credentials
 
     - name: map-jetstream-nats
       type: capability
       properties:
-        image: ghcr.io/Mattilsynet/map-nats-jetstream:v0.0.1-pre-2
+        image: file://./build/map-jetstream-nats.par.gz
       traits:
         - type: link
           properties:
@@ -55,4 +55,9 @@ spec:
                 properties:
                   jwt: ""
                   seed: ""
-                  url: "nats://connect.nats.mattilsynet.io"
+                  url: "nats://localhost:4222"
+            secrets:
+              - name: nats-credentials
+                properties:
+                  policy: nats-kv
+                  key: map-nats-jetstream-nats-credentials
