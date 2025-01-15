@@ -17,7 +17,6 @@ spec:
       type: component
       properties:
         image: file://./component/build/map-jetstream-nats-component_s.wasm
-        
       traits:
         - type: spreadscaler
           properties:
@@ -26,6 +25,11 @@ spec:
           properties:
             target: 
               name: map-jetstream-nats
+              secrets:
+                - name: nats-credentials
+                  properties:
+                    policy: nats-kv
+                    key: 
             namespace: mattilsynet
             package: provider-jetstream-nats
             interfaces: [jetstream-publish]
@@ -34,15 +38,11 @@ spec:
       type: capability
       properties:
         image: file://./build/map-nats-jetstream.par.gz
-        
       traits:
         - type: link
           properties:
             target: 
               name: test-component
-              config:
-            source:
-              name: test-component-source
             namespace: mattilsynet
             package: provider-jetstream-nats
             interfaces: [jetstream-consumer]
