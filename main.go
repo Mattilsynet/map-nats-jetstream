@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	server "github.com/Mattilsynet/map-jetstream-nats/bindings"
+	"github.com/Mattilsynet/map-jetstream-nats/pkg/config"
 	"go.wasmcloud.dev/provider"
 )
 
@@ -96,9 +97,9 @@ func run() error {
 
 func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
 	consumeHandler.provider.Logger.Info("Handling new source link", "link", link)
-	consumeHandler.linkedFrom[link.Target] = link.TargetConfig
-	consumerConfig := config.FromSource(link)
-	secrets := secrets.FromSource(link)
+	consumeHandler.linkedFrom[link.Target] = link.SourceConfig
+	consumerConfig := config.From(link.SourceConfig)
+	secrets := secrets.From(link.SourceSecrets)
 	// TODO: put it in consumerHandler
 	err := consumeHandler.RegisterConsumerComponent(link.Target)
 	if err != nil {
@@ -111,8 +112,8 @@ func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.In
 func handleNewTargetLink(publishHandler *PublishHandler, link provider.InterfaceLinkDefinition) error {
 	publishHandler.provider.Logger.Info("ZZZ Handling new target link ZZZ", "link", link)
 	publishHandler.linkedFrom[link.SourceID] = link.TargetConfig
-	publisherConfig := config.From(link)
-	secrets := secrets.From(link.TargetConfig)
+	publisherConfig := config.From(link.TargetConfig)
+	secrets := secrets.From(link.SourceSecrets)
 	// TODO: put it in publishHandler
 	publishHandler.RegisterPublisherComponent(context.Background(), link.SourceID)
 	return nil
