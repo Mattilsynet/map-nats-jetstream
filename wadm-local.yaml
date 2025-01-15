@@ -29,7 +29,11 @@ spec:
                 - name: nats-credentials
                   properties:
                     policy: nats-kv
-                    key: 
+                    key: map-jetstream-nats-account
+              config:
+                - name: nats-config
+                  properties:
+                    url: "nats://localhost:4222" 
             namespace: mattilsynet
             package: provider-jetstream-nats
             interfaces: [jetstream-publish]
@@ -43,8 +47,18 @@ spec:
           properties:
             target: 
               name: test-component
+            source:
+              secrets:
+                - name: nats-credentials
+                  properties:
+                    policy: nats-kv
+                    key: map-jetstream-nats-account
+              config:
+                - name: nats-config
+                  properties:
+                    url: "nats://localhosts:4222"
             namespace: mattilsynet
             package: provider-jetstream-nats
             interfaces: [jetstream-consumer]
                           
-            
+          
