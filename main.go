@@ -97,6 +97,9 @@ func run() error {
 func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
 	consumeHandler.provider.Logger.Info("Handling new source link", "link", link)
 	consumeHandler.linkedFrom[link.Target] = link.TargetConfig
+	consumerConfig := config.FromSource(link)
+	secrets := secrets.FromSource(link)
+	// TODO: put it in consumerHandler
 	err := consumeHandler.RegisterConsumerComponent(link.Target)
 	if err != nil {
 		consumeHandler.provider.Logger.Error("exiting with", "error", err)
@@ -108,6 +111,9 @@ func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.In
 func handleNewTargetLink(publishHandler *PublishHandler, link provider.InterfaceLinkDefinition) error {
 	publishHandler.provider.Logger.Info("ZZZ Handling new target link ZZZ", "link", link)
 	publishHandler.linkedFrom[link.SourceID] = link.TargetConfig
+	publisherConfig := config.From(link)
+	secrets := secrets.From(link.TargetConfig)
+	// TODO: put it in publishHandler
 	publishHandler.RegisterPublisherComponent(context.Background(), link.SourceID)
 	return nil
 }
