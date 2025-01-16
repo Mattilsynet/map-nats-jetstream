@@ -11,7 +11,11 @@ type Config struct {
 
 func From(config map[string]string) *Config {
 	return &Config{
-		NatsURL:        config["url"],
-		ProviderConfig: config,
+		NatsURL:               config["url"],
+		StreamName:            config["stream-name"],
+		StreamRetentionPolicy: config["stream-retention-policy"],
+		ConsumerName:          config["durable-consumer-name"],
+		Subject:               config["subject"],
+		ProviderConfig:        config,
 	}
 }

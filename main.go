@@ -36,6 +36,7 @@ func run() error {
 		AddSource: true,
 	}))
 	slog.SetDefault(logger)
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	p, err := provider.New(
 		provider.SourceLinkPut(func(link provider.InterfaceLinkDefinition) error {
@@ -100,6 +101,8 @@ func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.In
 	slog.Debug("Handling new source link", "link", link)
 	consumeHandler.linkedFrom[link.Target] = link.SourceConfig
 	consumerConfig := config.From(link.SourceConfig)
+	slog.Info("consumer link", "link", link)
+	slog.Info("consumerConfig", "consumerConfig", consumerConfig)
 	secrets := secrets.From(link.SourceSecrets)
 	// TODO: put it in consumerHandler
 	err := consumeHandler.RegisterConsumerComponent(link.Target, consumerConfig, secrets)

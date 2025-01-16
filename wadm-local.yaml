@@ -29,11 +29,12 @@ spec:
                 - name: nats-credentials
                   properties:
                     policy: nats-kv
-                    key: map-jetstream-nats-account
+                    key: map-nats-jetstream-nats-credentials
               config:
                 - name: nats-config
                   properties:
                     url: "nats://localhost:4222" 
+                    lewt: "lwt"
             namespace: mattilsynet
             package: provider-jetstream-nats
             interfaces: [jetstream-publish]
@@ -47,16 +48,25 @@ spec:
           properties:
             target: 
               name: test-component
+            source_config:
+              - name: bla
+                properties:
+                  kewt: "test"
             source:
               secrets:
                 - name: nats-credentials
                   properties:
                     policy: nats-kv
-                    key: map-jetstream-nats-account
+                    key: map-nats-jetstream-nats-credentials
               config:
                 - name: nats-config
                   properties:
-                    url: "nats://localhosts:4222"
+                    url: "nats://localhost:4222"
+                    stream-name: "test-stream"
+                    stream-retention-policy: "interest" # oneof "interest, workqueue, limits"
+                    subject: "test.>"
+                    durable-consumer-name: "test-consumer"
+
             namespace: mattilsynet
             package: provider-jetstream-nats
             interfaces: [jetstream-consumer]
