@@ -8,6 +8,9 @@ import (
 
 	"github.com/Mattilsynet/map-jetstream-nats/bindings/mattilsynet/provider_jetstream_nats/jetstream_consumer"
 	"github.com/Mattilsynet/map-jetstream-nats/bindings/mattilsynet/provider_jetstream_nats/types"
+	"github.com/Mattilsynet/map-jetstream-nats/pkg/config"
+	"github.com/Mattilsynet/map-jetstream-nats/pkg/pkgnats"
+	secrets "github.com/Mattilsynet/map-jetstream-nats/pkg/pkgsecrets"
 	"github.com/nats-io/nats.go"
 	sdk "go.wasmcloud.dev/provider"
 )
@@ -33,10 +36,8 @@ func NewConsumeHandler(linkedFrom, linkedTo map[string]map[string]string) Consum
 	}
 }
 
-func (p *ConsumeHandler) RegisterConsumerComponent(target string) error {
-	streamName := p.linkedFrom[target]["stream-name"]
-	streamRetentionPolicy := p.linkedFrom[target]["stream-retention-policy"]
-	println(streamRetentionPolicy)
+func (p *ConsumeHandler) RegisterConsumerComponent(target string, config *config.Config, secrets *secrets.Secrets) error {
+	streamRetentionPolicy := config.StreamRetentionPolicy
 	var retentionPolicy nats.RetentionPolicy
 	switch streamRetentionPolicy {
 	case "limits":
@@ -49,13 +50,16 @@ func (p *ConsumeHandler) RegisterConsumerComponent(target string) error {
 		return errors.New("invalid retention policy")
 
 	}
+	// INFO: Might not need the line of code underneath, doing it for backwards compatability with previous commit
+	p.linkedFrom[target] = config.ProviderConfig
+	// TODO: Put all the nats configuration inside pkgnats and leave this clean and only about how the component will get msgs
+	streamName := config.StreamName
 	// read from secrets
-	durableConsumerName := p.linkedFrom[target]["durable-consumer-name"]
-	subject := p.linkedFrom[target]["subject"]
-	jwt := p.linkedFrom[target]["jwt"]
-	seed := p.linkedFrom[target]["seed"]
-	url := p.linkedFrom[target]["url"]
-	nc, natsConnErr := nats.Connect(url, nats.UserJWTAndSeed(jwt, seed))
+	durableConsumerName := config.ConsumerName
+	credentialsFile := secrets.NatsCredentials
+	subject := config.Subject
+	url := config.NatsURL
+	nc, natsConnErr := pkgnats.CreateNatsConnection(target, credentialsFile, url)
 	p.natsConnections[target] = nc
 	if natsConnErr != nil {
 		return natsConnErr
@@ -81,6 +85,7 @@ func (p *ConsumeHandler) RegisterConsumerComponent(target string) error {
 	}
 	client := p.provider.OutgoingRpcClient(target)
 	p.subscriptions[target] = make([]*nats.Subscription, 0)
+
 	sub, subscriptionErr := js.Subscribe(subject, func(m *nats.Msg) {
 		headers := convertMapToWitHeaders(m.Header)
 		msg := &types.Msg{
@@ -106,12 +111,13 @@ func (p *ConsumeHandler) RegisterConsumerComponent(target string) error {
 	return nil
 }
 
-func (p *ConsumeHandler) DelSourceLink(target string) {
+func (p *ConsumeHandler) DelSourceLink(target string, sourceId string) {
 	for _, sub := range p.subscriptions[target] {
 		sub.Unsubscribe()
 	}
 	delete(p.subscriptions, target)
 	p.natsConnections[target].Close()
+	delete(p.linkedTo, sourceId)
 	delete(p.natsConnections, target)
 	delete(p.linkedFrom, target)
 }
@@ -129,7 +135,7 @@ func convertMapToWitHeaders(header nats.Header) []*types.KeyValue {
 
 func (p *ConsumeHandler) Shutdown() error {
 	for target := range p.subscriptions {
-		p.DelSourceLink(target)
+		p.DelSourceLink(target, "")
 	}
 	clear(p.natsConnections)
 	clear(p.linkedFrom)

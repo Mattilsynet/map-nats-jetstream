@@ -8,6 +8,9 @@ import (
 	"errors"
 
 	"github.com/Mattilsynet/map-jetstream-nats/bindings/mattilsynet/provider_jetstream_nats/types"
+	"github.com/Mattilsynet/map-jetstream-nats/pkg/config"
+	"github.com/Mattilsynet/map-jetstream-nats/pkg/pkgnats"
+	secrets "github.com/Mattilsynet/map-jetstream-nats/pkg/pkgsecrets"
 	"github.com/nats-io/nats.go"
 	sdk "go.wasmcloud.dev/provider"
 	wrpc "wrpc.io/go"
@@ -51,22 +54,27 @@ func NewPublishHandler(linkedFrom, linkedTo map[string]map[string]string) Publis
 	}
 }
 
-func (p *PublishHandler) RegisterPublisherComponent(ctx context.Context, sourceId string) error {
-	// read from secrets
-	jwt := p.linkedFrom[sourceId]["jwt"]
-	seed := p.linkedFrom[sourceId]["seed"]
-	url := p.linkedFrom[sourceId]["url"]
-	nc, natsConnErr := nats.Connect(url, nats.UserJWTAndSeed(jwt, seed))
-	p.natsConnections[sourceId] = nc
+func (p *PublishHandler) RegisterPublisherComponent(ctx context.Context, sourceId string, config *config.Config, secrets *secrets.Secrets) error {
+	url := config.NatsURL
+	p.linkedFrom[sourceId] = config.ProviderConfig
+	nc, natsConnErr := pkgnats.CreateNatsConnection(sourceId, secrets.NatsCredentials, url)
 	if natsConnErr != nil {
 		return natsConnErr
 	}
+	p.natsConnections[sourceId] = nc
 	js, jetStreamErr := nc.JetStream()
 	if jetStreamErr != nil {
 		return jetStreamErr
 	}
 	p.js[sourceId] = js
 	return nil
+}
+
+func (p *PublishHandler) DelTargetLink(target string, sourceId string) {
+	p.natsConnections[target].Close()
+	delete(p.linkedFrom, target)
+	delete(p.natsConnections, target)
+	delete(p.js, target)
 }
 
 func (p *PublishHandler) Shutdown() error {

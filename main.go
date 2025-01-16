@@ -12,6 +12,7 @@ import (
 
 	server "github.com/Mattilsynet/map-jetstream-nats/bindings"
 	"github.com/Mattilsynet/map-jetstream-nats/pkg/config"
+	secrets "github.com/Mattilsynet/map-jetstream-nats/pkg/pkgsecrets"
 	"go.wasmcloud.dev/provider"
 )
 
@@ -31,6 +32,10 @@ func run() error {
 		make(map[string]map[string]string),
 		make(map[string]map[string]string),
 	)
+	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+	}))
+	slog.SetDefault(logger)
 
 	p, err := provider.New(
 		provider.SourceLinkPut(func(link provider.InterfaceLinkDefinition) error {
@@ -58,10 +63,6 @@ func run() error {
 	// Store the provider for use in the handlers
 	publishHandler.provider = p
 	consumeHandler.provider = p
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		AddSource: true,
-	}))
-	slog.SetDefault(logger)
 	p.Logger = logger
 	// Setup two channels to await RPC and control interface operations
 	providerCh := make(chan error, 1)
@@ -96,39 +97,36 @@ func run() error {
 }
 
 func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
-	consumeHandler.provider.Logger.Info("Handling new source link", "link", link)
+	slog.Debug("Handling new source link", "link", link)
 	consumeHandler.linkedFrom[link.Target] = link.SourceConfig
 	consumerConfig := config.From(link.SourceConfig)
 	secrets := secrets.From(link.SourceSecrets)
 	// TODO: put it in consumerHandler
-	err := consumeHandler.RegisterConsumerComponent(link.Target)
+	err := consumeHandler.RegisterConsumerComponent(link.Target, consumerConfig, secrets)
 	if err != nil {
-		consumeHandler.provider.Logger.Error("exiting with", "error", err)
+		slog.Error("exiting with", "error", err)
 		os.Exit(1)
 	}
 	return nil
 }
 
 func handleNewTargetLink(publishHandler *PublishHandler, link provider.InterfaceLinkDefinition) error {
-	publishHandler.provider.Logger.Info("ZZZ Handling new target link ZZZ", "link", link)
-	publishHandler.linkedFrom[link.SourceID] = link.TargetConfig
 	publisherConfig := config.From(link.TargetConfig)
-	secrets := secrets.From(link.SourceSecrets)
-	// TODO: put it in publishHandler
-	publishHandler.RegisterPublisherComponent(context.Background(), link.SourceID)
+	publisherSecrets := secrets.From(link.SourceSecrets)
+	publishHandler.RegisterPublisherComponent(context.Background(), link.SourceID, publisherConfig, publisherSecrets)
 	return nil
 }
 
 func handleDelConsumerComponent(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
-	consumeHandler.provider.Logger.Info("Handling del source link", "link", link)
-	delete(consumeHandler.linkedTo, link.SourceID)
-	consumeHandler.DelSourceLink(link.SourceID)
+	slog.Debug("Handling del source link", "link", link)
+	consumeHandler.DelSourceLink(link.Target, link.SourceID)
 	return nil
 }
 
 func handleDelPublishConsumer(publishHandler *PublishHandler, link provider.InterfaceLinkDefinition) error {
-	publishHandler.provider.Logger.Info("Handling del target link", "link", link)
+	slog.Debug("Handling del target link", "link", link)
 	delete(publishHandler.linkedFrom, link.Target)
+	publishHandler.DelTargetLink(link.Target, link.SourceID)
 	return nil
 }
 
