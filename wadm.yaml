@@ -15,44 +15,51 @@ spec:
     - name: test-component
       type: component
       properties:
-        image: file://./component/build/map-jetstream-nats-component_s.wasm
+        image: file://./component/build/map-jetstream-nats-component_s.wasm #TODO: Maybe publish this
       traits:
         - type: spreadscaler
           properties:
             instances: 1
         - type: link
           properties:
-            target: map-jetstream-nats
+            target:
+              name: map-jetstream-nats
+              secrets:
+                - name: nats-credentials
+                  properties:
+                    policy: nats-kv
+                    key: map-nats-jetstream-nats-credentials
+              config:
+                - name: nats-config
+                  properties:
+                    url: "nats://localhost:4222" #TODO: add a central nats server
             namespace: mattilsynet
             package: provider-jetstream-nats
             interfaces: [jetstream-publish]
-            target_config:
-              - name: nats-config
-                properties:
-                  jwt: ""
-                  seed: ""
-                  url: "nats://connect.nats.mattilsynet.io"
 
     - name: map-jetstream-nats
       type: capability
       properties:
-        image: ghcr.io/Mattilsynet/map-nats-jetstream:v0.0.1-pre-2
+        image: ghcr.io/mattilsynet/map-nats-jetstream:v0.0.1-pre-3
       traits:
         - type: link
           properties:
-            target: test-component
+            target:
+              name: test-component
+            source:
+              secrets:
+                - name: nats-credentials
+                  properties:
+                    policy: nats-kv
+                    key: map-nats-jetstream-nats-credentials
+              config:
+                - name: nats-config
+                  properties:
+                    url: "nats://localhost:4222" #TODO: add a central nats server
+                    stream-name: "test-stream"
+                    stream-retention-policy: "interest" # oneof "interest, workqueue, limits"
+                    subject: "test.>"
+                    durable-consumer-name: "test-consumer"
             namespace: mattilsynet
             package: provider-jetstream-nats
             interfaces: [jetstream-consumer]
-            target_config:
-              - name: nats-jetstream
-                properties:
-                  stream-name: "test-stream"
-                  stream-retention-policy: "interest" # oneof "interest, workqueue, limits"
-                  subject: "test.>"
-                  durable-consumer-name: "test-consumer"
-              - name: nats-config
-                properties:
-                  jwt: ""
-                  seed: ""
-                  url: "nats://connect.nats.mattilsynet.io"

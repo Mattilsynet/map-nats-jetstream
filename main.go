@@ -8,6 +8,8 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"slices"
+	"strings"
 	"syscall"
 
 	server "github.com/Mattilsynet/map-jetstream-nats/bindings"
@@ -98,25 +100,29 @@ func run() error {
 }
 
 func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
-	slog.Debug("Handling new source link", "link", link)
-	consumeHandler.linkedFrom[link.Target] = link.SourceConfig
-	consumerConfig := config.From(link.SourceConfig)
-	slog.Info("consumer link", "link", link)
-	slog.Info("consumerConfig", "consumerConfig", consumerConfig)
-	secrets := secrets.From(link.SourceSecrets)
-	// TODO: put it in consumerHandler
-	err := consumeHandler.RegisterConsumerComponent(link.Target, consumerConfig, secrets)
-	if err != nil {
-		slog.Error("exiting with", "error", err)
-		os.Exit(1)
+	if slices.Contains(link.Interfaces, "jetstream-consumer") {
+		slog.Debug("Handling new source link", "link", link)
+		consumeHandler.linkedFrom[link.Target] = link.SourceConfig
+		consumerConfig := config.From(link.SourceConfig)
+		slog.Info("consumer link", "link", link)
+		slog.Info("consumerConfig", "consumerConfig", consumerConfig)
+		secrets := secrets.From(link.SourceSecrets)
+		// TODO: put it in consumerHandler
+		err := consumeHandler.RegisterConsumerComponent(link.Target, consumerConfig, secrets)
+		if err != nil {
+			slog.Error("exiting with", "error", err)
+			os.Exit(1)
+		}
 	}
 	return nil
 }
 
 func handleNewTargetLink(publishHandler *PublishHandler, link provider.InterfaceLinkDefinition) error {
-	publisherConfig := config.From(link.TargetConfig)
-	publisherSecrets := secrets.From(link.SourceSecrets)
-	publishHandler.RegisterPublisherComponent(context.Background(), link.SourceID, publisherConfig, publisherSecrets)
+	if slices.Contains(link.Interfaces, "jetstream-publish") {
+		publisherConfig := config.From(link.TargetConfig)
+		publisherSecrets := secrets.From(link.SourceSecrets)
+		publishHandler.RegisterPublisherComponent(context.Background(), link.SourceID, publisherConfig, publisherSecrets)
+	}
 	return nil
 }
 
