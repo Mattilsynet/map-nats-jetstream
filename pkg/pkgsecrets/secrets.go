@@ -1,6 +1,10 @@
 package secrets
 
-import "go.wasmcloud.dev/provider"
+import (
+	"encoding/base64"
+
+	"go.wasmcloud.dev/provider"
+)
 
 type Secrets struct {
 	NatsCredentials string
@@ -8,7 +12,8 @@ type Secrets struct {
 
 func From(secretsMap map[string]provider.SecretValue) *Secrets {
 	natsCredentialsEncrypted := secretsMap["nats-credentials"]
-	natsCredentials := natsCredentialsEncrypted.String.Reveal()
+	natsCredentialsBase64Encoded := natsCredentialsEncrypted.Bytes.Reveal()
+	natsCredentials := base64.StdEncoding.EncodeToString(natsCredentialsBase64Encoded)
 	return &Secrets{
 		NatsCredentials: natsCredentials,
 	}
