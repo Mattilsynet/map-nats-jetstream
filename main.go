@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/signal"
 	"slices"
-	"strings"
 	"syscall"
 
 	server "github.com/Mattilsynet/map-jetstream-nats/bindings"
