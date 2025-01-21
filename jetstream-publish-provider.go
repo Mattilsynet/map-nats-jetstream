@@ -36,10 +36,12 @@ func (p *PublishHandler) Publish(ctx__ context.Context, msg *types.Msg) (*wrpc.R
 		customErr := errors.New("received request from unknown origin")
 		return wrpc.Err[struct{}](customErr.Error()), nil
 	}
+	p.provider.Logger.Info("got request from source-id: ", "source-id", header.Get("source-id"))
 	sourceId := header.Get("source-id")
 	js := p.js[sourceId]
 	_, err := js.Publish(msg.Subject, msg.Data)
 	if err != nil {
+		p.provider.Logger.Error("Error publishing message: ", "err", err)
 		return wrpc.Err[struct{}](err.Error()), nil
 	}
 	return wrpc.Ok[string](struct{}{}), nil
