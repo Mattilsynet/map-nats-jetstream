@@ -106,7 +106,6 @@ func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.In
 		slog.Info("consumer link", "link", link)
 		slog.Info("consumerConfig", "consumerConfig", consumerConfig)
 		secrets := secrets.From(link.SourceSecrets)
-		// TODO: put it in consumerHandler
 		err := consumeHandler.RegisterConsumerComponent(link.Target, consumerConfig, secrets)
 		if err != nil {
 			slog.Error("exiting with", "error", err)
@@ -119,6 +118,7 @@ func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.In
 func handleNewTargetLink(publishHandler *PublishHandler, link provider.InterfaceLinkDefinition) error {
 	slog.Info("Handling new target link", "link", link)
 	if slices.Contains(link.Interfaces, "jetstream-publish") {
+		slog.Info("publisher link", "link", link)
 		publisherConfig := config.From(link.TargetConfig)
 		publisherSecrets := secrets.From(link.SourceSecrets)
 		publishHandler.RegisterPublisherComponent(context.Background(), link.SourceID, publisherConfig, publisherSecrets)
