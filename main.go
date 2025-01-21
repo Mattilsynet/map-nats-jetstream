@@ -99,8 +99,8 @@ func run() error {
 }
 
 func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
+	slog.Info("Handling new source link", "link", link)
 	if slices.Contains(link.Interfaces, "jetstream-consumer") {
-		slog.Debug("Handling new source link", "link", link)
 		consumeHandler.linkedFrom[link.Target] = link.SourceConfig
 		consumerConfig := config.From(link.SourceConfig)
 		slog.Info("consumer link", "link", link)
@@ -117,6 +117,7 @@ func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.In
 }
 
 func handleNewTargetLink(publishHandler *PublishHandler, link provider.InterfaceLinkDefinition) error {
+	slog.Info("Handling new target link", "link", link)
 	if slices.Contains(link.Interfaces, "jetstream-publish") {
 		publisherConfig := config.From(link.TargetConfig)
 		publisherSecrets := secrets.From(link.SourceSecrets)
@@ -126,13 +127,13 @@ func handleNewTargetLink(publishHandler *PublishHandler, link provider.Interface
 }
 
 func handleDelConsumerComponent(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
-	slog.Debug("Handling del source link", "link", link)
+	slog.Info("Handling del source link", "link", link)
 	consumeHandler.DelSourceLink(link.Target, link.SourceID)
 	return nil
 }
 
 func handleDelPublishConsumer(publishHandler *PublishHandler, link provider.InterfaceLinkDefinition) error {
-	slog.Debug("Handling del target link", "link", link)
+	slog.Info("Handling del target link", "link", link)
 	delete(publishHandler.linkedFrom, link.Target)
 	publishHandler.DelTargetLink(link.Target, link.SourceID)
 	return nil
