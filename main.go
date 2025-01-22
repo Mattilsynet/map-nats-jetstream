@@ -38,6 +38,8 @@ func run() error {
 	}))
 	slog.SetDefault(logger)
 	slog.SetLogLoggerLevel(slog.LevelDebug)
+	print("A stupid print line from map-jetstream-nats to check if slog is the reason for no logs")
+	slog.Info("Initializing provider", "name", "map-jetstream-nats")
 
 	p, err := provider.New(
 		provider.SourceLinkPut(func(link provider.InterfaceLinkDefinition) error {
@@ -60,8 +62,10 @@ func run() error {
 		}),
 	)
 	if err != nil {
+		slog.Error("Failed to create provider", "error", err)
 		return err
 	}
+	p.Logger.Info("Successfully created provider", "provider", "map-jetstream-nats")
 	// Store the provider for use in the handlers
 	publishHandler.provider = p
 	consumeHandler.provider = p
