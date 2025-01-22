@@ -63,11 +63,6 @@ func run() error {
 	// Store the provider for use in the handlers
 	publishHandler.provider = p
 	consumeHandler.provider = p
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		AddSource: true,
-	}))
-	slog.SetDefault(logger)
-	p.Logger = logger
 	// Setup two channels to await RPC and control interface operations
 	providerCh := make(chan error, 1)
 	signalCh := make(chan os.Signal, 1)
