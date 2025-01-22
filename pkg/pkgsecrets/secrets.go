@@ -3,19 +3,15 @@ package secrets
 import (
 	"encoding/base64"
 	"log/slog"
-
-	"go.wasmcloud.dev/provider"
 )
 
 type Secrets struct {
 	NatsCredentials string
 }
 
-func From(secretsMap map[string]provider.SecretValue) *Secrets {
-	natsCredentialsEncrypted := secretsMap["nats-credentials"]
-	natsCredentialsBase64Encoded := natsCredentialsEncrypted.String.Reveal()
-	slog.Info("Nats credentials base64encoded, with size: ", "size", len(natsCredentialsBase64Encoded))
-	natsCredentials, err := base64.StdEncoding.DecodeString(natsCredentialsBase64Encoded)
+func From(base64encoded string) *Secrets {
+	slog.Info("Nats credentials base64encoded, with size: ", "size", len(base64encoded))
+	natsCredentials, err := base64.StdEncoding.DecodeString(base64encoded)
 	if err != nil {
 		return nil
 	}

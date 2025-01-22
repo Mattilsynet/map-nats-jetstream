@@ -1,19 +1,13 @@
 package secrets
 
 import (
-	"log"
 	"testing"
-
-	"go.wasmcloud.dev/provider"
 )
 
 func TestFrom(t *testing.T) {
-	log.Println("Hey")
-	testJson := []byte("{\"kind\": \"String\", \"value\": \"dGVzdA==\"}")
-	secretValueTest := provider.SecretValue{}
-	secretValueTest.UnmarshalJSON(testJson)
+	test := "dGVzdA=="
 	type args struct {
-		secretsMap map[string]provider.SecretValue
+		string
 	}
 	tests := []struct {
 		name string
@@ -30,9 +24,7 @@ func TestFrom(t *testing.T) {
 		{
 			"tc: adding secret base64encoded, yields creds",
 			args{
-				map[string]provider.SecretValue{
-					"nats-credentials": secretValueTest,
-				},
+				test,
 			},
 			&Secrets{
 				NatsCredentials: "test",
@@ -41,7 +33,7 @@ func TestFrom(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := From(tt.args.secretsMap); got.NatsCredentials != tt.want.NatsCredentials {
+			if got := From(tt.args.string); got.NatsCredentials != tt.want.NatsCredentials {
 				t.Fatalf("From() = %v, want %v", got, tt.want)
 			}
 		})
