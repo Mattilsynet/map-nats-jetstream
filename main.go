@@ -102,7 +102,7 @@ func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.In
 		consumerConfig := config.From(link.SourceConfig)
 		consumeHandler.provider.Logger.Info("consumer link", "link", link)
 		consumeHandler.provider.Logger.Info("consumerConfig", "consumerConfig", consumerConfig)
-		secrets := secrets.From(link.SourceSecrets["nats-credentials"].String.Reveal())
+		secrets := secrets.From(link.SourceSecrets)
 		err := consumeHandler.RegisterConsumerComponent(link.Target, consumerConfig, secrets)
 		if err != nil {
 			consumeHandler.provider.Logger.Error("exiting with", "error", err)
@@ -117,7 +117,7 @@ func handleNewTargetLink(publishHandler *PublishHandler, link provider.Interface
 	if slices.Contains(link.Interfaces, "jetstream-publish") {
 		publishHandler.provider.Logger.Info("publisher link", "link", link)
 		publisherConfig := config.From(link.TargetConfig)
-		publisherSecrets := secrets.From(link.SourceSecrets["nats-credentials"].String.Reveal())
+		publisherSecrets := secrets.From(link.TargetSecrets)
 		err := publishHandler.RegisterPublisherComponent(context.Background(), link.SourceID, publisherConfig, publisherSecrets)
 		if err != nil {
 			publishHandler.provider.Logger.Error("Handling new target link", "link", link)
