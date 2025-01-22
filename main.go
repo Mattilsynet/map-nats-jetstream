@@ -38,7 +38,6 @@ func run() error {
 	}))
 	slog.SetDefault(logger)
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	print("A stupid print line from map-jetstream-nats to check if slog is the reason for no logs")
 	slog.Info("Initializing provider", "name", "map-jetstream-nats")
 
 	p, err := provider.New(
@@ -103,47 +102,52 @@ func run() error {
 }
 
 func handleNewConsumerComponent(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
-	slog.Info("Handling new source link", "link", link)
+	consumeHandler.provider.Logger.Info("Handling new source link", "link", link)
 	if slices.Contains(link.Interfaces, "jetstream-consumer") {
 		consumeHandler.linkedFrom[link.Target] = link.SourceConfig
 		consumerConfig := config.From(link.SourceConfig)
-		slog.Info("consumer link", "link", link)
-		slog.Info("consumerConfig", "consumerConfig", consumerConfig)
+		consumeHandler.provider.Logger.Info("consumer link", "link", link)
+		consumeHandler.provider.Logger.Info("consumerConfig", "consumerConfig", consumerConfig)
 		secrets := secrets.From(link.SourceSecrets)
 		err := consumeHandler.RegisterConsumerComponent(link.Target, consumerConfig, secrets)
 		if err != nil {
-			slog.Error("exiting with", "error", err)
-			os.Exit(1)
+			consumeHandler.provider.Logger.Error("exiting with", "error", err)
+			return err
 		}
 	}
 	return nil
 }
 
 func handleNewTargetLink(publishHandler *PublishHandler, link provider.InterfaceLinkDefinition) error {
-	slog.Info("Handling new target link", "link", link)
+	publishHandler.provider.Logger.Info("Handling new target link", "link", link)
 	if slices.Contains(link.Interfaces, "jetstream-publish") {
-		slog.Info("publisher link", "link", link)
+		publishHandler.provider.Logger.Info("publisher link", "link", link)
 		publisherConfig := config.From(link.TargetConfig)
 		publisherSecrets := secrets.From(link.SourceSecrets)
-		publishHandler.RegisterPublisherComponent(context.Background(), link.SourceID, publisherConfig, publisherSecrets)
+		err := publishHandler.RegisterPublisherComponent(context.Background(), link.SourceID, publisherConfig, publisherSecrets)
+		if err != nil {
+			publishHandler.provider.Logger.Error("Handling new target link", "link", link)
+			return err
+		}
 	}
 	return nil
 }
 
 func handleDelConsumerComponent(consumeHandler *ConsumeHandler, link provider.InterfaceLinkDefinition) error {
-	slog.Info("Handling del source link", "link", link)
+	consumeHandler.provider.Logger.Info("Handling del source link", "link", link)
 	consumeHandler.DelSourceLink(link.Target, link.SourceID)
 	return nil
 }
 
 func handleDelPublishConsumer(publishHandler *PublishHandler, link provider.InterfaceLinkDefinition) error {
-	slog.Info("Handling del target link", "link", link)
+	publishHandler.provider.Logger.Info("Handling del target link", "link", link)
 	delete(publishHandler.linkedFrom, link.Target)
 	publishHandler.DelTargetLink(link.Target, link.SourceID)
 	return nil
 }
 
 func handleHealthCheck(publishHandler *PublishHandler, consumeHandler *ConsumeHandler) string {
+	// TODO: Add some propper health check, f.ex towards nats connection etc from both handlers
 	return "provider healthy"
 }
 
