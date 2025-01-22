@@ -42,6 +42,8 @@ jobs:
           [[ ! -f wadm.yaml ]] || wash app validate wadm.yaml
           [[ ! -f local.wadm.yaml ]] || wash app validate local.wadm.yaml
      - name: wash build
+       env:
+         WASH_ISSUER_KEY: ${{ secrets.WASH_ISSUER_KEY  }}
        shell: bash
        run: |
          wash build
