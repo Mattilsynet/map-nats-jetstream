@@ -52,24 +52,20 @@ func (p *ConsumeHandler) RegisterConsumerComponent(target string, config *config
 		return errors.New("invalid retention policy" + streamRetentionPolicy)
 
 	}
-	slog.Info("11")
 	// INFO: Might not need the line of code underneath, doing it for backwards compatability with previous commit
 	p.linkedFrom[target] = config.ProviderConfig
 	// TODO: Put all the nats configuration inside pkgnats and leave this clean and only about how the component will get msgs
-	slog.Info("111")
 	streamName := config.StreamName
 	// read from secrets
 	durableConsumerName := config.ConsumerName
 	credentialsFile := secrets.NatsCredentials
 	subject := config.Subject
 	url := config.NatsURL
-	slog.Info("1111")
 	nc, natsConnErr := pkgnats.CreateNatsConnection(target, credentialsFile, url)
 	p.natsConnections[target] = nc
 	if natsConnErr != nil {
 		return natsConnErr
 	}
-	slog.Info("11111")
 	js, jsErr := nc.JetStream()
 	if jsErr != nil {
 		return jsErr
