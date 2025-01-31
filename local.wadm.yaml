@@ -1,0 +1,50 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: map-nats-jetstream
+  annotations:
+    version: v0.0.1
+    description: "An application with a provider and component built to supply components with nats-jetstream publish and consumer capabilities"
+spec:
+  components:
+    - name: test-component
+      type: component
+      properties:
+        image: file://./component/build/map-jetstream-nats-component_s.wasm
+      traits:
+        - type: spreadscaler
+          properties:
+            instances: 1
+        - type: link
+          properties:
+            target: 
+              name: map-jetstream-nats
+              config:
+                - name: nats-core-config
+                  properties:
+                    url: "nats://localhost:4222" 
+            namespace: mattilsynet
+            package: provider-jetstream-nats
+            interfaces: [jetstream-publish]
+       
+    - name: map-jetstream-nats
+      type: capability
+      properties:
+        image: file://./build/map-nats-jetstream.par.gz
+      traits:
+        - type: link
+          properties:
+            target: 
+              name: test-component
+            source:
+              config:
+                - name: nats-config
+                  properties:
+                    url: "nats://localhost:4222"
+                    stream-name: "test-stream"
+                    stream-retention-policy: "interest"
+                    subject: "test.>"
+                    durable-consumer-name: "test-consumer"
+            namespace: mattilsynet
+            package: provider-jetstream-nats
+            interfaces: [jetstream-consumer]

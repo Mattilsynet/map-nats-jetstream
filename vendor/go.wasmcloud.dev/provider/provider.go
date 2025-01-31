@@ -151,17 +151,9 @@ func NewWithHostDataSource(source io.Reader, options ...ProviderHandler) (*Wasmc
 		global.SetLoggerProvider(loggerProvider)
 		internalShutdownFuncs = append(internalShutdownFuncs, func(c context.Context) error { return loggerProvider.Shutdown(c) })
 	}
-	var nc *nats.Conn
 
 	// Connect to NATS
-	if hostData.LatticeRPCUserSeed != "" && hostData.LatticeRPCUserJWT != "" {
-		opts := nats.UserJWTAndSeed(hostData.LatticeRPCUserJWT, hostData.LatticeRPCUserSeed)
-		logger.Debug("connecting to nats with userJWTAndSeed")
-		nc, err = nats.Connect(hostData.LatticeRPCURL, opts)
-	} else {
-		logger.Debug("connecting to nats", "url", hostData.LatticeRPCURL)
-		nc, err = nats.Connect(hostData.LatticeRPCURL)
-	}
+	nc, err := nats.Connect(hostData.LatticeRPCURL)
 	if err != nil {
 		return nil, err
 	}
