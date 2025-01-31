@@ -1,5 +1,69 @@
 # map-jetstream-nats
 Supports very limited jetstream capabilities such as jetstream.Publish and registering a durable consumer to aggregate messages to a component.
+
+## Link definition settings 
+To configure this provider, use the following link settings in your link defitinion:
+
+OBS! nats-credentials used in secrets in yaml examples underneath requires base64 encoded nats-credentials. The nats-credentials must be jwt and seed pem blocked.
+
+```yaml
+# setup your component to get a consumer, you have to implement 'jetstream-consumer' in your component
+---
+    - name: nats-jetstream
+      type: capability
+      properties:
+        image: ghcr.io/Mattilsynet/map-nats-jetstream:v0.0.1-pre-17
+      traits:
+        - type: link
+          properties:
+            target: 
+              name: <your-awesome-component-name>
+            source:
+              config:
+                - name: nats-jetstream-nats-url
+                  properties:
+                    url: "nats://connect.nats.mattilsynet.io"
+                - name: nats-jetstream-consumer-config
+                  properties:
+                    stream-name: "<some-stream-name>"
+                    stream-retention-policy: "workqueue" # oneof "interest, workqueue, limits"
+                    subject: "<your-awesome-subject"
+                    durable-consumer-name: "<durable-consumer-name>"
+              secrets:
+                - name: nats-credentials
+                  properties:
+                    policy: nats-kv
+                    key: <some-key-in-nats-kv>
+            namespace: mattilsynet
+            package: provider-jetstream-nats
+            interfaces: [jetstream-consumer]
+---
+# setup your component to have jetstream.Publish capability
+    - name: <your-awesome-component>
+      type: component
+      properties:
+        image: <your-awesome-image>
+        traits:
+        - type: spreadscaler
+          properties:
+            instances: 1
+        - type: link
+          properties:
+            target:
+              name: map-jetstream-nats
+              secrets:
+                - name: nats-credentials
+                  properties:
+                    policy: nats-kv
+                    key: <your-credentials-file-in-nats-kv>
+              config:
+                - name: nats-jetstream-config
+                  properties:
+                    url: "<your-nate-server>"
+            namespace: mattilsynet
+            package: provider-jetstream-nats
+            interfaces: [jetstream-publish]
+```
 ## Building
 
 Prerequisites:
