@@ -108,5 +108,5 @@ cd ..
 # Launch wasmCloud in the background
 wash up -d
 # Deploy the application
-wash app deploy ./wadm.yaml
+wash app deploy local.wadm.yaml
 ```

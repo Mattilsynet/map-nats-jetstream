@@ -6,11 +6,6 @@ metadata:
     version: v0.0.1
     description: "An application with a provider and component built to supply components with nats-jetstream publish and consumer capabilities"
 spec:
-  policies:
-    - name: nats-kv
-      type: policy.secret.wasmcloud.dev/v1alpha1
-      properties:
-        backend: nats-kv
   components:
     - name: test-component
       type: component
@@ -24,13 +19,8 @@ spec:
           properties:
             target: 
               name: map-jetstream-nats
-              secrets:
-                - name: nats-credentials
-                  properties:
-                    policy: nats-kv
-                    key: map-nats-jetstream-nats-credentials
               config:
-                - name: nats-config
+                - name: nats-core-config
                   properties:
                     url: "nats://localhost:4222" 
             namespace: mattilsynet
@@ -47,21 +37,14 @@ spec:
             target: 
               name: test-component
             source:
-              secrets:
-                - name: nats-credentials
-                  properties:
-                    policy: nats-kv
-                    key: map-nats-jetstream-nats-credentials
               config:
                 - name: nats-config
                   properties:
                     url: "nats://localhost:4222"
                     stream-name: "test-stream"
-                    stream-retention-policy: "interest" # oneof "interest, workqueue, limits"
+                    stream-retention-policy: "interest"
                     subject: "test.>"
                     durable-consumer-name: "test-consumer"
             namespace: mattilsynet
             package: provider-jetstream-nats
             interfaces: [jetstream-consumer]
-                          
-          
