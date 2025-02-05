@@ -61,6 +61,7 @@ func (p *PublishHandler) RegisterPublisherComponent(ctx context.Context, sourceI
 	p.linkedFrom[sourceId] = config.ProviderConfig
 	nc, natsConnErr := pkgnats.CreateNatsConnection(sourceId, secrets.NatsCredentials, url)
 	if natsConnErr != nil {
+		p.provider.Logger.Error("Error creating nats connection: ", "err", natsConnErr)
 		return natsConnErr
 	}
 	p.natsConnections[sourceId] = nc

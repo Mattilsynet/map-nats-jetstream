@@ -1,4 +1,4 @@
-module github.com/Mattilsynet/map-jetstream-nats
+module github.com/Mattilsynet/map-nats-jetstream
 
 go 1.23
 

@@ -141,7 +141,11 @@ func handleDelPublishConsumer(publishHandler *PublishHandler, link provider.Inte
 }
 
 func handleHealthCheck(publishHandler *PublishHandler, consumeHandler *ConsumeHandler) string {
-	// TODO: Add some propper health check, f.ex towards nats connection etc from both handlers
+	// 1. for each handler
+	// 2. check connected component
+	// 3. if connected component
+	// 4. check if nats connection up
+	mapOfPublishers := publishHandler.linkedFrom
 	return "provider healthy"
 }
 
