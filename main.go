@@ -1,4 +1,4 @@
-//go:generate wit-bindgen-wrpc go --out-dir bindings --package github.com/Mattilsynet/map-jetstream-nats/bindings wit
+//go:generate wit-bindgen-wrpc go --out-dir bindings --package github.com/Mattilsynet/map-nats-jetstream/bindings wit
 
 package main
 
@@ -11,9 +11,9 @@ import (
 	"slices"
 	"syscall"
 
-	server "github.com/Mattilsynet/map-jetstream-nats/bindings"
-	"github.com/Mattilsynet/map-jetstream-nats/pkg/config"
-	secrets "github.com/Mattilsynet/map-jetstream-nats/pkg/pkgsecrets"
+	server "github.com/Mattilsynet/map-nats-jetstream/bindings"
+	"github.com/Mattilsynet/map-nats-jetstream/pkg/config"
+	secrets "github.com/Mattilsynet/map-nats-jetstream/pkg/pkgsecrets"
 	"go.wasmcloud.dev/provider"
 )
 
@@ -145,7 +145,6 @@ func handleHealthCheck(publishHandler *PublishHandler, consumeHandler *ConsumeHa
 	// 2. check connected component
 	// 3. if connected component
 	// 4. check if nats connection up
-	mapOfPublishers := publishHandler.linkedFrom
 	return "provider healthy"
 }
 

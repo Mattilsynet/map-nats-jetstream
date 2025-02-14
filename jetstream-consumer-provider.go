@@ -7,11 +7,11 @@ import (
 	"slices"
 	"time"
 
-	"github.com/Mattilsynet/map-jetstream-nats/bindings/mattilsynet/provider_jetstream_nats/jetstream_consumer"
-	"github.com/Mattilsynet/map-jetstream-nats/bindings/mattilsynet/provider_jetstream_nats/types"
-	"github.com/Mattilsynet/map-jetstream-nats/pkg/config"
-	"github.com/Mattilsynet/map-jetstream-nats/pkg/pkgnats"
-	secrets "github.com/Mattilsynet/map-jetstream-nats/pkg/pkgsecrets"
+	"github.com/Mattilsynet/map-nats-jetstream/bindings/mattilsynet/map_nats_jetstream/jetstream_consumer"
+	"github.com/Mattilsynet/map-nats-jetstream/bindings/mattilsynet/map_nats_jetstream/types"
+	"github.com/Mattilsynet/map-nats-jetstream/pkg/config"
+	"github.com/Mattilsynet/map-nats-jetstream/pkg/pkgnats"
+	secrets "github.com/Mattilsynet/map-nats-jetstream/pkg/pkgsecrets"
 	"github.com/nats-io/nats.go"
 	sdk "go.wasmcloud.dev/provider"
 )

@@ -1,5 +1,5 @@
 # NOTE: Not yet supported
-name = "Nats Jetstream Nats"
+name = "map-jetstream-nats"
 language = "go"
 type = "provider"
 version = "0.1.0"

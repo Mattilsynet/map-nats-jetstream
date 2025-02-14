@@ -1,4 +1,4 @@
-package mattilsynet:provider-jetstream-nats;
+package mattilsynet:map-nats-jetstream;
 
 interface types {
     record key-value {
