@@ -1,7 +1,7 @@
 package mattilsynet:component-jetstream-nats;
 
 world component {
-    export mattilsynet:provider-jetstream-nats/jetstream-consumer;
-    import mattilsynet:provider-jetstream-nats/jetstream-publish;
+    export mattilsynet:map-nats-jetstream/jetstream-consumer;
+    import mattilsynet:map-nats-jetstream/jetstream-publish;
     include wasmcloud:component-go/imports@0.1.0;
 }

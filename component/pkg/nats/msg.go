@@ -1,9 +1,9 @@
 package nats
 
 import (
-	"github.com/Mattilsynet/map-jetstream-nats/component/gen/mattilsynet/provider-jetstream-nats/types"
 	jetstreamconsumer "github.com/Mattilsynet/map-nats-jetstream/component/gen/mattilsynet/map-nats-jetstream/jetstream-consumer"
 	jetstreampublish "github.com/Mattilsynet/map-nats-jetstream/component/gen/mattilsynet/map-nats-jetstream/jetstream-publish"
+	"github.com/Mattilsynet/map-nats-jetstream/component/gen/mattilsynet/map-nats-jetstream/types"
 	"github.com/bytecodealliance/wasm-tools-go/cm"
 )
 

@@ -1,2 +1,2 @@
 [overrides]
-"mattilsynet:provider-jetstream-nats" = { path = "../wit" }
+"mattilsynet:map-nats-jetstream" = { path = "../wit" }

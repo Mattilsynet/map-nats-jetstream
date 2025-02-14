@@ -2,7 +2,7 @@
 package main
 
 import (
-	"github.com/Mattilsynet/map-jetstream-nats/component/pkg/nats"
+	"github.com/Mattilsynet/map-nats-jetstream/component/pkg/nats"
 	"go.wasmcloud.dev/component/log/wasilog"
 )
 

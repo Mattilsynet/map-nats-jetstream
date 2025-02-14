@@ -48,7 +48,6 @@ jobs:
         shell: bash
         run: |
           wash build
-      # INFO: dependancies for building test-component
       - name: wash build test-component
         shell: bash
         run: |
