@@ -69,8 +69,8 @@ jobs:
       - name: go crosscompile
         shell: bash
         run: |
-          GOOS=darwin GOARCH=arm64 go build -o darwin main.go provider.go  
-          GOOS=windows GOARCH=amd64 go build -o windows.exe main.go provider.go
+          GOOS=darwin GOARCH=arm64 go build -o darwin main.go jetstream-consumer-provider.go jetstream-publish-provider.go  
+          GOOS=windows GOARCH=amd64 go build -o windows.exe main.go jetstream-comsumer-provider.go jetstream-publish-provider.go
       - name: wash par insert binaries
         shell: bash
         run: |
