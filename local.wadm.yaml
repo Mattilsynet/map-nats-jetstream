@@ -17,16 +17,16 @@ spec:
             instances: 1
         - type: link
           properties:
-            target: 
+            target:
               name: map-jetstream-nats
               config:
                 - name: nats-core-config
                   properties:
-                    url: "nats://localhost:4222" 
+                    url: "nats://localhost:4222"
             namespace: mattilsynet
-            package: provider-jetstream-nats
+            package: map-nats-jetstream
             interfaces: [jetstream-publish]
-       
+
     - name: map-jetstream-nats
       type: capability
       properties:
@@ -34,7 +34,7 @@ spec:
       traits:
         - type: link
           properties:
-            target: 
+            target:
               name: test-component
             source:
               config:
@@ -46,5 +46,5 @@ spec:
                     subject: "test.>"
                     durable-consumer-name: "test-consumer"
             namespace: mattilsynet
-            package: provider-jetstream-nats
+            package: map-nats-jetstream
             interfaces: [jetstream-consumer]

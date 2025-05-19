@@ -18,12 +18,12 @@ jobs:
       - name: install go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22.0' 
+          go-version: "1.22.0"
       - name: install tinygo
         uses: acifani/setup-tinygo@v2
         with:
-          tinygo-version: '0.33.0'
-          install-binaryen: 'false'
+          tinygo-version: "0.33.0"
+          install-binaryen: "false"
       - name: install wash tools
         uses: taiki-e/install-action@v2
         with:
@@ -31,10 +31,10 @@ jobs:
       - name: install wit-bindgen-wrpc
         shell: bash
         run: |
-           curl -LO https://github.com/bytecodealliance/wrpc/releases/download/v0.11.1/wit-bindgen-wrpc-x86_64-unknown-linux-musl;
-           mv wit-bindgen-wrpc-x86_64-unknown-linux-musl wit-bindgen-wrpc
-           chmod +x wit-bindgen-wrpc
-           install -m 755 wit-bindgen-wrpc /usr/local/bin/
+          curl -LO https://github.com/bytecodealliance/wrpc/releases/download/v0.11.1/wit-bindgen-wrpc-x86_64-unknown-linux-musl;
+          mv wit-bindgen-wrpc-x86_64-unknown-linux-musl wit-bindgen-wrpc
+          chmod +x wit-bindgen-wrpc
+          install -m 755 wit-bindgen-wrpc /usr/local/bin/
       - name: generate go files
         shell: bash
         run: |
@@ -44,10 +44,38 @@ jobs:
         run: |
           [[ ! -f wadm.yaml ]] || wash app validate wadm.yaml
           [[ ! -f local.wadm.yaml ]] || wash app validate local.wadm.yaml
+      - name: Setup registry
+        env:
+          WASH_REG_USER: ${{ github.actor }}
+          WASH_REG_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          cat << EOF > package_config.toml
+          [namespace_registries]
+          mattilsynet = "ghcr.io"
+
+          [registry."ghcr.io".oci]
+          auth = { username = "${WASH_REG_USER}", password = "${WASH_REG_PASSWORD}"}
+          EOF
+          echo "WASH_PACKAGE_CONFIG_FILE=$(realpath package_config.toml)" >> $GITHUB_ENV
+      - name: wash wit fetch
+        shell: bash
+        run: |
+          wash wit fetch
       - name: wash build provider
         shell: bash
         run: |
           wash build
+      - name: go crosscompile
+        shell: bash
+        run: |
+          GOOS=darwin GOARCH=arm64 go build -o darwin main.go provider.go  
+          GOOS=windows GOARCH=amd64 go build -o windows.exe main.go provider.go
+      - name: wash par insert binaries
+        shell: bash
+        run: |
+          wash par insert ./build/${{env.providername}}.par.gz --binary ./darwin --arch aarch64-macos 
+          wash par insert ./build/${{env.providername}}.par.gz --binary ./windows.exe --arch x86_64-windows
       - name: wash build test-component
         shell: bash
         run: |
@@ -84,6 +112,10 @@ jobs:
         working-directory:
           build
           #INFO: create tar.gz
+      - name: build wit
+        run: wash wit build
+      - name: publish wit
+        run: wash wit publish *.wasm
       - name: Create tar.gz
         run: |
           tar -czf ${{ env.providername }}.tar.gz ./build/${{ env.providername }}.par.gz
