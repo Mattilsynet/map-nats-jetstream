@@ -6,6 +6,7 @@ import (
 
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/Mattilsynet/map-nats-jetstream/bindings/mattilsynet/map_nats_jetstream/types"
 	"github.com/Mattilsynet/map-nats-jetstream/pkg/config"
@@ -17,6 +18,8 @@ import (
 	wrpcnats "wrpc.io/go/nats"
 )
 
+const JETSTREAM_PROVIDER_NAME = "JETSTREAM_PUBLISHER"
+
 // / Your PublishHandler struct is where you can store any state or configuration that your provider needs to keep track of.
 type PublishHandler struct {
 	// The provider instance
@@ -26,7 +29,6 @@ type PublishHandler struct {
 	// All components this provider is linked to and their config
 	linkedTo        map[string]map[string]string
 	natsConnections map[string]*nats.Conn
-	js              map[string]nats.JetStreamContext
 }
 
 func (p *PublishHandler) Publish(ctx__ context.Context, msg *types.Msg) (*wrpc.Result[struct{}, string], error) {
@@ -38,8 +40,16 @@ func (p *PublishHandler) Publish(ctx__ context.Context, msg *types.Msg) (*wrpc.R
 	}
 	p.provider.Logger.Info("got request from source-id: ", "source-id", header.Get("source-id"))
 	sourceId := header.Get("source-id")
-	js := p.js[sourceId]
-	_, err := js.Publish(msg.Subject, msg.Data)
+	natsConn, ok := p.natsConnections[sourceId]
+	if !ok {
+		return nil, fmt.Errorf("no nats connection found for source-id: %s", sourceId)
+	}
+	js, err := natsConn.JetStream()
+	if err != nil {
+		p.provider.Logger.Error("Error getting JetStream context: ", "err", err)
+		return nil, err
+	}
+	_, err = js.Publish(msg.Subject, msg.Data)
 	if err != nil {
 		p.provider.Logger.Error("Error publishing message: ", "err", err)
 		return wrpc.Err[struct{}](err.Error()), nil
@@ -52,7 +62,6 @@ func NewPublishHandler(linkedFrom, linkedTo map[string]map[string]string) Publis
 		linkedFrom:      linkedFrom,
 		linkedTo:        linkedTo,
 		natsConnections: make(map[string]*nats.Conn),
-		js:              make(map[string]nats.JetStreamContext),
 	}
 }
 
@@ -65,11 +74,6 @@ func (p *PublishHandler) RegisterPublisherComponent(ctx context.Context, sourceI
 		return natsConnErr
 	}
 	p.natsConnections[sourceId] = nc
-	js, jetStreamErr := nc.JetStream()
-	if jetStreamErr != nil {
-		return jetStreamErr
-	}
-	p.js[sourceId] = js
 	return nil
 }
 
@@ -77,7 +81,6 @@ func (p *PublishHandler) DelTargetLink(target string, sourceId string) {
 	p.natsConnections[target].Close()
 	delete(p.linkedFrom, target)
 	delete(p.natsConnections, target)
-	delete(p.js, target)
 }
 
 func (p *PublishHandler) Shutdown() error {
@@ -85,7 +88,6 @@ func (p *PublishHandler) Shutdown() error {
 		nc.Close()
 	}
 	clear(p.natsConnections)
-	clear(p.js)
 	clear(p.linkedFrom)
 	clear(p.linkedTo)
 	return nil
