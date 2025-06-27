@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log/slog"
 	"slices"
 	"time"
 
@@ -39,7 +38,6 @@ func NewConsumeHandler(linkedFrom, linkedTo map[string]map[string]string) Consum
 
 func (p *ConsumeHandler) RegisterConsumerComponent(target string, config *config.Config, secrets *secrets.Secrets) error {
 	streamRetentionPolicy := config.StreamRetentionPolicy
-	slog.Info("1")
 	var retentionPolicy nats.RetentionPolicy
 	switch streamRetentionPolicy {
 	case "limits":
@@ -88,7 +86,7 @@ func (p *ConsumeHandler) RegisterConsumerComponent(target string, config *config
 	client := p.provider.OutgoingRpcClient(target)
 	p.subscriptions[target] = make([]*nats.Subscription, 0)
 
-	sub, subscriptionErr := js.Subscribe(subject, func(m *nats.Msg) {
+	sub, subscriptionErr := js.Subscribe("", func(m *nats.Msg) {
 		headers := convertMapToWitHeaders(m.Header)
 		msg := &types.Msg{
 			Data:    m.Data,
