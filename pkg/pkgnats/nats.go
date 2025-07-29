@@ -47,7 +47,8 @@ func setupNatsConnectionOpts(opts []nats.Option) []nats.Option {
 	opts = append(opts, nats.MaxReconnects(int(totalWait/reconnectDelay)))
 	slog.Info("pkgnats: max reconnects option set to " + fmt.Sprintf("%v", int(totalWait/reconnectDelay)))
 	opts = append(opts, nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
-		slog.Info(fmt.Sprintf("Disconnected: will attempt reconnects for %.0fm", totalWait.Minutes()))
+		slog.Info("Nats disconnected", "nats", "disconnected")
+		panic("nats disconnect, exiting application such that we don't force application to have nats creds in memory")
 	}))
 	opts = append(opts, nats.ReconnectHandler(func(nc *nats.Conn) {
 		slog.Info(fmt.Sprintf("Reconnected [%s]", nc.ConnectedUrl()))
